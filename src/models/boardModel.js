@@ -44,9 +44,21 @@ const findOneById = async (boardId) => {
   } catch (error) { throw new Error(error) }
 }
 
+// Query tổng hợp (aggregate) để lấy toàn bộ Columns và Cards thuộc về Board
+const getDetails = async (boardId) => {
+  try {
+    // Hôm nay tạm thời giống hệt hàm findOneById - và sẽ update phần aggregate tiếp
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOne({
+      _id: new ObjectId(String(boardId)) // dùng new ObjectId(boardId) :lỗi cảnh báo deprecated
+    })
+    return result
+  } catch (error) { throw new Error(error) }
+}
+
 export const boardModel = {
   BOARD_COLLECTION_NAME,
   BOARD_COLLECTION_SCHEMA,
   createNew,
-  findOneById
+  findOneById,
+  getDetails
 }
