@@ -41,7 +41,6 @@ const getDetails = async (boardId) => {
     resBoard.columns.forEach(column => {
       // Cách dùng .equals này là bởi vì chúng ta hiểu ObjectId trong MongoDB có support method .equals
       column.cards = resBoard.cards.filter(card => card.columnId.equals(column._id))
-
       // // Cách khác đơn giản là convert ObjectId về string bằng hàm toString() của JavaScript
       // column.cards = resBoard.cards.filter(card => card.columnId.toString() === column._id.toString())
     })
