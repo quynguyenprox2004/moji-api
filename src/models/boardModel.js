@@ -46,10 +46,14 @@ const validateBeforeCreate = (data) => {
   return BOARD_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
 }
 
-const createNew = async (data) => {
+const createNew = async (userId, data) => {
   try {
     const validData = await validateBeforeCreate(data)
-    const createdBoard = await GET_DB().collection(BOARD_COLLECTION_NAME).insertOne(validData)
+    const newBoardToAdd = {
+      ...validData,
+      ownerIds: [new ObjectId(String(userId))]
+    }
+    const createdBoard = await GET_DB().collection(BOARD_COLLECTION_NAME).insertOne(newBoardToAdd)
     return createdBoard
   } catch (error) { throw new Error(error) }
 }
@@ -64,18 +68,24 @@ const findOneById = async (boardId) => {
 }
 
 // Query tổng hợp (aggregate) để lấy toàn bộ Columns và Cards thuộc về Board
-const getDetails = async (boardId) => {
+const getDetails = async (userId, boardId) => {
   try {
     // const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOne({
     //   _id: new ObjectId(String(boardId)) // dùng new ObjectId(boardId) :lỗi cảnh báo deprecated
     // })
-    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).aggregate([
+    const queryConditions = [
+      { _id: new ObjectId(String(boardId)) },
+      { _destroy: false },
       {
-        $match: {
-          _id: new ObjectId(String(boardId)),
-          _destroy: false
-        }
-      },
+        $or: [
+          { ownerIds: { $all: [new ObjectId(String(userId))] } },
+          { memberIds: { $all: [new ObjectId(String(userId))] } }
+        ]
+      }
+    ]
+
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).aggregate([
+      { $match: { $and: queryConditions } },
       {
         $lookup: {
           from: columnModel.COLUMN_COLLECTION_NAME,
