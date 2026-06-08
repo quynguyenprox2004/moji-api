@@ -19,6 +19,20 @@ const createNew = async (reqBody) => {
   } catch (error) { throw error }
 }
 
+const update = async (cardId, reqBody) => {
+  try {
+    const updatedData = {
+      ...reqBody,
+      updatedAt: new Date() // Cập nhật trường updatedAt mỗi khi có thay đổi
+    }
+    const updatedCard = await cardModel.update(cardId, updatedData)
+
+
+    return updatedCard
+  } catch (error) { throw error }
+}
+
 export const cardService = {
-  createNew
+  createNew,
+  update
 }
