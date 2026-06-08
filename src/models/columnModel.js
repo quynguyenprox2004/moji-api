@@ -100,7 +100,7 @@ const update = async (columnId, updateData) => {
 
 const deleteManyByBoardId = async (boardId) => {
   try {
-    const result = await GET_DB().collection(COLUMN_COLLECTION_NAME).deleteMany({ columnId: new ObjectId(String(boardId)) })
+    const result = await GET_DB().collection(COLUMN_COLLECTION_NAME).deleteMany({ boardId: new ObjectId(String(boardId)) })
     return result
   } catch (error) { throw new Error(error) }
 }

@@ -154,7 +154,7 @@ const update = async (userId, reqBody, userAvaterFile) => {
     } else if (userAvaterFile) {
       // Trường hợp upload file lên Cloud Storage, cụ thể là Cloudinary
       const uploadResult = await CloudinaryProvider.streamUpload(userAvaterFile.buffer, 'users')
-      console.log('uploadResult: ', uploadResult)
+      // console.log('uploadResult: ', uploadResult)
 
       // Lưu lại url (secure_url) của cái file ảnh vào trong Database
       updatedUser = await userModel.update(existUser._id, {

@@ -76,13 +76,16 @@ const deleteItem = async (boardId) => {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Board not found!')
     }
 
-    // Xóa board
+    // 1. Xóa board
     await boardModel.deleteOneById(boardId)
 
-    // Xóa toàn bộ Cards thuộc cái Column trên
+    // 2. Xóa toàn bộ Cards thuộc cái Column trên
     await columnModel.deleteManyByBoardId(boardId)
 
-    return { deleteResult: 'Board deleted successfully!' }
+    // 3. Xóa toàn bộ Cards thuộc về cái Board này
+    await cardModel.deleteManyByBoardId(boardId)
+
+    return { deleteResult: 'Board, its Columns and its Cards deleted successfully!' }
   } catch (error) { throw error }
 }
 
