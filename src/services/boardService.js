@@ -68,6 +68,24 @@ const update = async (boardId, reqBody) => {
   } catch (error) { throw error }
 }
 
+const deleteItem = async (boardId) => {
+  try {
+    const targetBoard = await boardModel.findOneById(boardId)
+
+    if (!targetBoard) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Board not found!')
+    }
+
+    // Xóa board
+    await boardModel.deleteOneById(boardId)
+
+    // Xóa toàn bộ Cards thuộc cái Column trên
+    await columnModel.deleteManyByBoardId(boardId)
+
+    return { deleteResult: 'Board deleted successfully!' }
+  } catch (error) { throw error }
+}
+
 const moveCardToDifferentColumn = async (reqBody) => {
   try {
     // B1: Cập nhật mảng cardOrderIds của Column ban đầu chứa nó (Hiểu bản chất là xóa cái _id của Card ra khỏi mảng)
@@ -106,5 +124,6 @@ export const boardService = {
   getDetails,
   update,
   moveCardToDifferentColumn,
-  getBoards
+  getBoards,
+  deleteItem
 }
