@@ -44,6 +44,15 @@ const update = async (req, res, next) => {
   } catch (error) { next(error) }
 }
 
+const deleteItem = async (req, res, next) => {
+  try {
+    const boardId = req.params.id
+    const result = await boardService.deleteItem(boardId)
+
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) { next(error) }
+}
+
 const moveCardToDifferentColumn = async (req, res, next) => {
   try {
     const result = await boardService.moveCardToDifferentColumn(req.body)
@@ -67,6 +76,7 @@ export const boardController = {
   createNew,
   getDetails,
   update,
+  deleteItem,
   moveCardToDifferentColumn,
   getBoards
 }
