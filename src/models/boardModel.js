@@ -27,9 +27,9 @@ const BOARD_COLLECTION_SCHEMA = Joi.object({
   ).default([]),
 
   // Những thành viên của board
-  memberIds: Joi.array().items(
-    Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
-  ).default([]),
+  // memberIds: Joi.array().items(
+  //   Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+  // ).default([]),
 
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null),
@@ -74,14 +74,19 @@ const getDetails = async (userId, boardId) => {
     //   _id: new ObjectId(String(boardId)) // dùng new ObjectId(boardId) :lỗi cảnh báo deprecated
     // })
     const queryConditions = [
+      // { _id: new ObjectId(String(boardId)) },
+      // { _destroy: false },
+      // {
+      //   $or: [
+      //     { ownerIds: { $all: [new ObjectId(String(userId))] } },
+      //     { memberIds: { $all: [new ObjectId(String(userId))] } }
+      //   ]
+      // }
+
+      // Đơn người dùng
       { _id: new ObjectId(String(boardId)) },
       { _destroy: false },
-      {
-        $or: [
-          { ownerIds: { $all: [new ObjectId(String(userId))] } },
-          { memberIds: { $all: [new ObjectId(String(userId))] } }
-        ]
-      }
+      { ownerIds: { $all: [new ObjectId(String(userId))] } }
     ]
 
     const result = await GET_DB().collection(BOARD_COLLECTION_NAME).aggregate([
@@ -161,15 +166,19 @@ const update = async (boardId, updateData) => {
 const getBoards = async (userId, page, itemsPerPage) => {
   try {
     const queryConditions = [
-      // Điều kiện 1: Board chưa bị xóa
+      // // Điều kiện 1: Board chưa bị xóa
+      // { _destroy: false },
+      // // Điều kiện 2: cái thằng userId đang thực hiện request này nó phải thuộc một trong 2 cái mảng ownerIds hoặc memberIds, sử dụng toán tử $all của mongodb
+      // {
+      //   $or: [
+      //     { ownerIds: { $all: [new ObjectId(String(userId))] } },
+      //     { memberIds: { $all: [new ObjectId(String(userId))] } }
+      //   ]
+      // }
+
+      // Đơn người dùng
       { _destroy: false },
-      // Điều kiện 2: cái thằng userId đang thực hiện request này nó phải thuộc một trong 2 cái mảng ownerIds hoặc memberIds, sử dụng toán tử $all của mongodb
-      {
-        $or: [
-          { ownerIds: { $all: [new ObjectId(String(userId))] } },
-          { memberIds: { $all: [new ObjectId(String(userId))] } }
-        ]
-      }
+      { ownerIds: { $all: [new ObjectId(String(userId))] } }
     ]
 
     const query = await GET_DB().collection(BOARD_COLLECTION_NAME).aggregate(
