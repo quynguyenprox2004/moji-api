@@ -56,8 +56,15 @@ const getDetails = async (userId, boardId) => {
   } catch (error) { throw error }
 }
 
-const update = async (boardId, reqBody) => {
+const update = async (userId, boardId, reqBody) => {
   try {
+    // Kiểm tra board có thuộc về user không
+    const targetBoard = await boardModel.findOneById(boardId)
+    if (!targetBoard) throw new ApiError(StatusCodes.NOT_FOUND, 'Board not found!')
+    if (!targetBoard.ownerIds.some(id => id.toString() === userId.toString())) {
+      throw new ApiError(StatusCodes.FORBIDDEN, 'You are not authorized to update this board!')
+    }
+
     const updateData = {
       ...reqBody,
       updatedAt: Date.now()
@@ -68,12 +75,15 @@ const update = async (boardId, reqBody) => {
   } catch (error) { throw error }
 }
 
-const deleteItem = async (boardId) => {
+const deleteItem = async (userId, boardId) => {
   try {
     const targetBoard = await boardModel.findOneById(boardId)
 
     if (!targetBoard) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Board not found!')
+    }
+    if (!targetBoard.ownerIds.some(id => id.toString() === userId.toString())) {
+      throw new ApiError(StatusCodes.FORBIDDEN, 'You are not authorized to delete this board!')
     }
 
     // 1. Xóa board

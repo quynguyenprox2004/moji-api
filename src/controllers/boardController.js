@@ -34,10 +34,11 @@ const getDetails = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
+    const userId = req.jwtDecoded._id // thêm dòng này
     const boardId = req.params.id
 
     // Điều hướng dữ liệu sang tầng Service
-    const updatedBoard = await boardService.update(boardId, req.body)
+    const updatedBoard = await boardService.update(userId, boardId, req.body)
 
     // Có kết quả thì trả về phía Client
     res.status(StatusCodes.OK).json(updatedBoard)
@@ -46,8 +47,9 @@ const update = async (req, res, next) => {
 
 const deleteItem = async (req, res, next) => {
   try {
+    const userId = req.jwtDecoded._id // thêm dòng này
     const boardId = req.params.id
-    const result = await boardService.deleteItem(boardId)
+    const result = await boardService.deleteItem(userId, boardId)
 
     res.status(StatusCodes.OK).json(result)
   } catch (error) { next(error) }
