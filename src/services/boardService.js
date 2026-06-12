@@ -56,8 +56,15 @@ const getDetails = async (userId, boardId) => {
   } catch (error) { throw error }
 }
 
-const update = async (boardId, reqBody) => {
+const update = async (userId, boardId, reqBody) => {
   try {
+    // Kiểm tra board có thuộc về user không
+    const targetBoard = await boardModel.findOneById(boardId)
+    if (!targetBoard) throw new ApiError(StatusCodes.NOT_FOUND, 'Board not found!')
+    if (!targetBoard.ownerIds.some(id => id.toString() === userId.toString())) {
+      throw new ApiError(StatusCodes.FORBIDDEN, 'You are not authorized to update this board!')
+    }
+
     const updateData = {
       ...reqBody,
       updatedAt: Date.now()
@@ -68,12 +75,15 @@ const update = async (boardId, reqBody) => {
   } catch (error) { throw error }
 }
 
-const deleteItem = async (boardId) => {
+const deleteItem = async (userId, boardId) => {
   try {
     const targetBoard = await boardModel.findOneById(boardId)
 
     if (!targetBoard) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Board not found!')
+    }
+    if (!targetBoard.ownerIds.some(id => id.toString() === userId.toString())) {
+      throw new ApiError(StatusCodes.FORBIDDEN, 'You are not authorized to delete this board!')
     }
 
     // 1. Xóa board
@@ -110,13 +120,18 @@ const moveCardToDifferentColumn = async (reqBody) => {
   } catch (error) { throw error }
 }
 
-const getBoards = async (userId, page, itemsPerPage) => {
+const getBoards = async (userId, page, itemsPerPage, queryFilters) => {
   try {
     // Nếu không tồn tại page hoặc itemsPerPage từ phía FE thì BE sẽ cần phải luôn gán giá trị mặc định
     if (!page) page = DEFAULT_PAGE
     if (!itemsPerPage) itemsPerPage = DEFAULT_ITEMS_PER_PAGE
 
-    const results = await boardModel.getBoards(userId, parseInt(page, 10), parseInt(itemsPerPage, 10))
+    const results = await boardModel.getBoards(
+      userId,
+      parseInt(page, 10),
+      parseInt(itemsPerPage, 10),
+      queryFilters
+    )
 
     return results
   } catch (error) { throw error }

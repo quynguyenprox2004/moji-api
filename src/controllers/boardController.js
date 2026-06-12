@@ -34,10 +34,11 @@ const getDetails = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
+    const userId = req.jwtDecoded._id // thêm dòng này
     const boardId = req.params.id
 
     // Điều hướng dữ liệu sang tầng Service
-    const updatedBoard = await boardService.update(boardId, req.body)
+    const updatedBoard = await boardService.update(userId, boardId, req.body)
 
     // Có kết quả thì trả về phía Client
     res.status(StatusCodes.OK).json(updatedBoard)
@@ -46,8 +47,9 @@ const update = async (req, res, next) => {
 
 const deleteItem = async (req, res, next) => {
   try {
+    const userId = req.jwtDecoded._id // thêm dòng này
     const boardId = req.params.id
-    const result = await boardService.deleteItem(boardId)
+    const result = await boardService.deleteItem(userId, boardId)
 
     res.status(StatusCodes.OK).json(result)
   } catch (error) { next(error) }
@@ -65,8 +67,11 @@ const getBoards = async (req, res, next) => {
   try {
     const userId = req.jwtDecoded._id
     // page và itemsPerPage được truyền vào trong query url từ phía FE nên BE sẽ lấy thông qua req.query
-    const { page, itemsPerPage } = req.query
-    const result = await boardService.getBoards(userId, page, itemsPerPage)
+    const { page, itemsPerPage, q } = req.query
+    const queryFilters = q
+    // console.log(queryFilters)
+
+    const result = await boardService.getBoards(userId, page, itemsPerPage, queryFilters)
 
     res.status(StatusCodes.OK).json(result)
   } catch (error) { next(error) }
